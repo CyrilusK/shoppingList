@@ -95,6 +95,20 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         retryButton.isHidden = false
         indicatorLoading.stopAnimating()
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        if position > collectionView.contentSize.height - 100 - scrollView.frame.size.height {
+            output?.pagination()
+        }
+    }
+    
+    func appendItems(_ newItems: [Item]) {
+        let startIndex = items.count
+        items.append(contentsOf: newItems)
+        let indexPaths = (startIndex..<items.count).map { IndexPath(row: $0, section: 0) }
+        collectionView.insertItems(at: indexPaths)
+    }
 }
 
 extension CatalogViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {

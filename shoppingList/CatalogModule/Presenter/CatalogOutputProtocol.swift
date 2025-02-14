@@ -14,4 +14,5 @@ protocol CatalogOutputProtocol: AnyObject {
     func showError(_ error: Error)
     func getImage(_ url: String?, completion: @escaping (UIImage?) -> Void)
     func didFetchItems(_ items: [Item])
+    func pagination()
 }

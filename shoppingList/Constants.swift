@@ -16,7 +16,8 @@ struct K {
     static let serverError = "Failed to download image from server"
     
     //Ключ api
-    static let urlAPI = "https://api.escuelajs.co/api/v1/products"
+    static let urlAPI = "https://api.escuelajs.co/api/v1/products?offset="
+    static let postfix = "&limit=20"
     
     //Идентификатор
     static let reuseIdentifier = "ItemCell"

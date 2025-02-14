@@ -12,14 +12,19 @@ final class CatalogPresenter: CatalogOutputProtocol {
     var interactor: CatalogInteractorInputProtocol?
     var router: CatalogRouterInputProtocol?
     
+    private var isLoading = false
+    private var nextPage = 0
+    private var isPagination = false
+    
     func viewDidLoad() {
         loadItems()
         view?.setupIndicator()
     }
     
     private func loadItems() {
+        isLoading = true
         Task(priority: .userInitiated) {
-            await interactor?.fetchItems(urlString: K.urlAPI)
+            await interactor?.fetchItems(urlString: K.urlAPI + String(nextPage) + K.postfix)
             DispatchQueue.main.async {
                 self.view?.setupUI()
             }
@@ -33,8 +38,17 @@ final class CatalogPresenter: CatalogOutputProtocol {
     }
     
     func didFetchItems(_ items: [Item]) {
+        guard !isPagination && !items.isEmpty else {
+            return
+        }
+        self.isLoading = false
         DispatchQueue.main.async {
-            self.view?.showItems(items)
+            if self.isPagination {
+                self.view?.appendItems(items)
+                self.isPagination = false
+            } else {
+                self.view?.showItems(items)
+            }
         }
     }
     
@@ -44,6 +58,7 @@ final class CatalogPresenter: CatalogOutputProtocol {
     
     func showError(_ error: Error) {
         DispatchQueue.main.async {
+            self.isLoading = false
             if let error = error as? ApiError {
                 self.view?.showError("Failed to load news: \(error.errorDescription)")
             } else {
@@ -63,6 +78,16 @@ final class CatalogPresenter: CatalogOutputProtocol {
             DispatchQueue.main.async {
                 completion(image)
             }
+        }
+    }
+    
+    func pagination() {
+        guard !isLoading else { return }
+        nextPage += 20
+        isLoading = true
+        isPagination = true
+        Task(priority: .userInitiated) {
+            await interactor?.fetchItems(urlString: K.urlAPI + String(nextPage) + K.postfix)
         }
     }
 }

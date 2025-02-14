@@ -12,4 +12,5 @@ protocol CatalogViewInputProtocol: AnyObject {
     func setupUI()
     func showItems(_ items: [Item])
     func showError(_ message: String)
+    func appendItems(_ newItems: [Item])
 }
