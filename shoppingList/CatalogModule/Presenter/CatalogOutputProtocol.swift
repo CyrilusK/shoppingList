@@ -15,4 +15,6 @@ protocol CatalogOutputProtocol: AnyObject {
     func getImage(_ url: String?, completion: @escaping (UIImage?) -> Void)
     func didFetchItems(_ items: [Item])
     func pagination()
+    func didSearchTextChange(_ text: String)
+    func getSearchHistory() -> [String]
 }

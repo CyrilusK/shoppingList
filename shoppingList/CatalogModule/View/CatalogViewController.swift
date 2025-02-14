@@ -15,15 +15,16 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let emptyStateLabel = UILabel()
     private let retryButton = UIButton(type: .system)
+    private let searchBar = UISearchBar()
+    private let historyTableView = UITableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         output?.viewDidLoad()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        collectionView.frame = view.bounds
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
     
     func setupIndicator() {
@@ -37,9 +38,44 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     
     func setupUI() {
         indicatorLoading.stopAnimating()
+        setupSearchBar()
         setupCollectionView()
         setupEmptyStateLabel()
         setupRetryButton()
+        setupHistoryTableView()
+    }
+    
+    private func setupHistoryTableView() {
+        historyTableView.isHidden = true
+        historyTableView.delegate = self
+        historyTableView.dataSource = self
+        historyTableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(historyTableView)
+        NSLayoutConstraint.activate([
+            historyTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            historyTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            historyTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            historyTableView.heightAnchor.constraint(equalToConstant: 220)
+        ])
+        historyTableView.register(UITableViewCell.self, forCellReuseIdentifier: "HistoryCell")
+    }
+    
+    private func setupSearchBar() {
+        searchBar.searchTextField.backgroundColor = .systemGroupedBackground
+        searchBar.searchTextField.textColor = .black
+        searchBar.searchBarStyle = .minimal
+        searchBar.placeholder = K.textPlaceholderSearchBar
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchBar)
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        searchBar.delegate = self
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        collectionView.addGestureRecognizer(tapGesture)
     }
     
     private func setupCollectionView() {
@@ -48,10 +84,17 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(ItemCell.self, forCellWithReuseIdentifier: K.reuseIdentifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+        ])
     }
     
     private func setupEmptyStateLabel() {
-        emptyStateLabel.text = "Не найдено"
+        emptyStateLabel.text = K.notFound
         emptyStateLabel.textAlignment = .center
         emptyStateLabel.textColor = .gray
         emptyStateLabel.font = UIFont.systemFont(ofSize: 28, weight: .medium)
@@ -65,7 +108,7 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     }
     
     private func setupRetryButton() {
-        retryButton.setTitle("Ошибка загрузки данных", for: .normal)
+        retryButton.setTitle(K.errorLoading, for: .normal)
         retryButton.addTarget(self, action: #selector(tapRetryButton), for: .touchUpInside)
         view.addSubview(retryButton)
         retryButton.translatesAutoresizingMaskIntoConstraints = false
@@ -79,6 +122,11 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         retryButton.isHidden = true
         indicatorLoading.startAnimating()
         output?.reloadItems()
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+        historyTableView.isHidden = true
     }
     
     func showItems(_ items: [Item]) {
@@ -108,6 +156,11 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         items.append(contentsOf: newItems)
         let indexPaths = (startIndex..<items.count).map { IndexPath(row: $0, section: 0) }
         collectionView.insertItems(at: indexPaths)
+    }
+    
+    func updateSearchHistory(_ history: [String]) {
+        historyTableView.isHidden = history.isEmpty
+        historyTableView.reloadData()
     }
 }
 
@@ -143,5 +196,52 @@ extension CatalogViewController: UICollectionViewDataSource, UICollectionViewDel
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+    }
+}
+
+extension CatalogViewController: UISearchBarDelegate {
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        historyTableView.isHidden = false
+        return true
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let text = searchBar.text, !text.isEmpty {
+            output?.didSearchTextChange(text)
+        }
+        searchBar.resignFirstResponder()
+        historyTableView.isHidden = true
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            output?.reloadItems()
+            dismissKeyboard()
+        } else {
+            historyTableView.isHidden = false
+        }
+    }
+}
+
+extension CatalogViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return output?.getSearchHistory().count ?? 0
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryCell", for: indexPath)
+        if let searchHistory = output?.getSearchHistory() {
+            var cellContext = cell.defaultContentConfiguration()
+            cellContext.text = searchHistory[indexPath.row]
+                cell.contentConfiguration = cellContext
+        }
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let searchHistory = output?.getSearchHistory() {
+            searchBar.text = searchHistory[indexPath.row]
+            searchBarSearchButtonClicked(searchBar)
+        }
     }
 }

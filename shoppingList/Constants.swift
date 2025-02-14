@@ -21,4 +21,9 @@ struct K {
     
     //Идентификатор
     static let reuseIdentifier = "ItemCell"
+    
+    static let textPlaceholderSearchBar = "Поиск товаров"
+    static let notFound = "Не найдено"
+    static let errorLoading = "Ошибка загрузки данных \nПопробуйте еще раз"
+    static let photo = "photo"
 }

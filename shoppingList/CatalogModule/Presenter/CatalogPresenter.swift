@@ -16,6 +16,19 @@ final class CatalogPresenter: CatalogOutputProtocol {
     private var nextPage = 0
     private var isPagination = false
     
+    private var items: [Item] = []
+    private var filteredItems: [Item] = []
+    private var isSearchActive: Bool = false
+    private var searchHistory: [String] = [] {
+        didSet {
+            UserDefaults.standard.set(searchHistory, forKey: "searchHistory")
+        }
+    }
+    
+    init() {
+        searchHistory = UserDefaults.standard.stringArray(forKey: "searchHistory") ?? []
+    }
+    
     func viewDidLoad() {
         loadItems()
         view?.setupIndicator()
@@ -38,15 +51,17 @@ final class CatalogPresenter: CatalogOutputProtocol {
     }
     
     func didFetchItems(_ items: [Item]) {
-        guard !isPagination && !items.isEmpty else {
+        guard !items.isEmpty else {
             return
         }
         self.isLoading = false
         DispatchQueue.main.async {
             if self.isPagination {
+                self.items.append(contentsOf: items)
                 self.view?.appendItems(items)
                 self.isPagination = false
             } else {
+                self.items = items
                 self.view?.showItems(items)
             }
         }
@@ -69,7 +84,7 @@ final class CatalogPresenter: CatalogOutputProtocol {
     
     func getImage(_ url: String?, completion: @escaping (UIImage?) -> Void) {
         guard let url = url else {
-            completion(UIImage(systemName: "photo"))
+            completion(UIImage(systemName: K.photo))
             return
         }
         
@@ -89,5 +104,32 @@ final class CatalogPresenter: CatalogOutputProtocol {
         Task(priority: .userInitiated) {
             await interactor?.fetchItems(urlString: K.urlAPI + String(nextPage) + K.postfix)
         }
+    }
+    
+    func didSearchTextChange(_ text: String) {
+        isSearchActive = !text.isEmpty
+        
+        if isSearchActive {
+            if let index = searchHistory.firstIndex(of: text) {
+                searchHistory.remove(at: index)
+            }
+            searchHistory.insert(text, at: 0)
+            if searchHistory.count > 5 {
+                searchHistory.removeLast()
+            }
+        }
+        
+        filteredItems = isSearchActive ? items.filter { $0.title.lowercased().contains(text.lowercased()) } : []
+        view?.updateSearchHistory(searchHistory)
+        updateView()
+    }
+    
+    private func updateView() {
+        let itemsForDisplay = isSearchActive ? filteredItems : items
+        view?.showItems(itemsForDisplay)
+    }
+    
+    func getSearchHistory() -> [String] {
+        return searchHistory
     }
 }

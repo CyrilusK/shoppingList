@@ -13,4 +13,5 @@ protocol CatalogViewInputProtocol: AnyObject {
     func showItems(_ items: [Item])
     func showError(_ message: String)
     func appendItems(_ newItems: [Item])
+    func updateSearchHistory(_ history: [String])
 }
