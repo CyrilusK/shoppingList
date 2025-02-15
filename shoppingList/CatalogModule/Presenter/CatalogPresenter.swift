@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CatalogPresenter: CatalogOutputProtocol {
+final class CatalogPresenter: CatalogOutputProtocol, FilterModuleDelegate {
     weak var view: CatalogViewInputProtocol?
     var interactor: CatalogInteractorInputProtocol?
     var router: CatalogRouterInputProtocol?
@@ -39,7 +39,7 @@ final class CatalogPresenter: CatalogOutputProtocol {
     private func loadItems() {
         isLoading = true
         Task(priority: .userInitiated) {
-            await interactor?.fetchItems(urlString: K.urlAPI + String(nextPage) + K.postfix)
+            await interactor?.fetchItems(urlString: buildFilteredURL())
             DispatchQueue.main.async {
                 self.view?.setupUI()
             }
@@ -48,14 +48,11 @@ final class CatalogPresenter: CatalogOutputProtocol {
     
     func reloadItems() {
         Task(priority: .userInitiated) {
-            await interactor?.fetchItems(urlString: K.urlAPI)
+            await interactor?.fetchItems(urlString: buildFilteredURL())
         }
     }
     
     func didFetchItems(_ items: [Item]) {
-        guard !items.isEmpty else {
-            return
-        }
         self.isLoading = false
         DispatchQueue.main.async {
             if self.isPagination {
@@ -103,9 +100,7 @@ final class CatalogPresenter: CatalogOutputProtocol {
         nextPage += 20
         isLoading = true
         isPagination = true
-        Task(priority: .userInitiated) {
-            await interactor?.fetchItems(urlString: K.urlAPI + String(nextPage) + K.postfix)
-        }
+        reloadItems()
     }
     
     func didSearchTextChange(_ text: String) {
@@ -134,21 +129,25 @@ final class CatalogPresenter: CatalogOutputProtocol {
         return searchHistory
     }
     
-    func didSelectFilters(_ filters: [String: String]) {
-        selectedFilters = filters
-        reloadItems()
-    }
-    
     func openFilterScreen() {
-        router?.navigateToFilters(selectedFilters)
+        router?.navigateToFilters(selectedFilters, self)
     }
     
     private func buildFilteredURL() -> String {
-        var url = K.urlAPI + String(nextPage) + K.postfix
+        var url = K.urlAPI
+        
         if !selectedFilters.isEmpty {
             let queryParams = selectedFilters.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
             url += "?" + queryParams
         }
+        url += (selectedFilters.isEmpty ? "?" : "&") + K.offset + String(nextPage) + K.limit
         return url
+    }
+    
+    func didApplyFilters(_ filters: [String: String]) {
+        selectedFilters = filters
+        nextPage = 0
+        reloadItems()
+        print("[DEBUG] Примененные фильтры: \(buildFilteredURL())")
     }
 }

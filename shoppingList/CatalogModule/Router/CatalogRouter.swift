@@ -14,8 +14,8 @@ final class CatalogRouter: CatalogRouterInputProtocol {
         entry?.present(FilterViewController(), animated: true)
     }
     
-    func navigateToFilters(_ params: [String: String]) {
-        let filterVC = FilterViewController()
+    func navigateToFilters(_ params: [String: String], _ delegate: FilterModuleDelegate) {
+        let filterVC = FilterConfigurator().configure(params: params, delegate: delegate)
         
         if let sheet = filterVC.sheetPresentationController {
             sheet.animateChanges {

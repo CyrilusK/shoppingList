@@ -7,7 +7,8 @@
 
 import UIKit
 
-class FilterViewController: UIViewController {
+class FilterViewController: UIViewController, FilterViewInputProtocol {
+    var output: FilterOutputProtocol?
     
     private let headerLabel = UILabel()
     private let titleLabel = UILabel()
@@ -19,7 +20,6 @@ class FilterViewController: UIViewController {
     private let priceTextField = UITextField()
     private let applyButton = UIButton(type: .system)
     private let cleanButton = UIButton(type: .system)
-    private let categories = ["Одежда", "Электроника", "Мебель", "Обувь", "Разное", "Ноутбуки", "Аксессуары"]
     
     private let categoriesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -31,7 +31,7 @@ class FilterViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        output?.viewDidLoad()
     }
 
     func setupUI() {
@@ -48,6 +48,7 @@ class FilterViewController: UIViewController {
         setupApplyButton()
         setupCleanButton()
         setupStackView()
+        populateFieldsFromParams()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -85,6 +86,7 @@ class FilterViewController: UIViewController {
         titleTextField.placeholder = "Название"
         titleTextField.borderStyle = .roundedRect
         titleTextField.keyboardType = .default
+        titleTextField.autocorrectionType = .no
         titleTextField.delegate = self
     }
     
@@ -154,8 +156,33 @@ class FilterViewController: UIViewController {
         ])
     }
     
+    private func populateFieldsFromParams() {
+        let params = output?.getParams() ?? [:]
+        
+        if let title = params["title"] {
+            titleTextField.text = title
+        }
+        if let minPrice = params["price_min"] {
+            minPriceTextField.text = minPrice
+        }
+        if let maxPrice = params["price_max"] {
+            maxPriceTextField.text = maxPrice
+        }
+        if let price = params["price"] {
+            priceTextField.text = price
+        }
+        if let categoryId = params["categoryId"], let category = Categories(rawValue: Int(categoryId) ?? 1) {
+            output?.toggleCategory(category)
+        }
+    }
+    
     @objc private func applyFilters() {
-        dismiss(animated: true)
+        output?.applyFilters(
+            title: titleTextField.text,
+            minPrice: minPriceTextField.text,
+            maxPrice: maxPriceTextField.text,
+            price: priceTextField.text)
+        //dismiss(animated: true)
     }
     
     @objc private func cleanFilters() {
@@ -163,29 +190,45 @@ class FilterViewController: UIViewController {
         minPriceTextField.text = ""
         maxPriceTextField.text = ""
         priceTextField.text = ""
-        
+        output?.cleanFilters()
+        categoriesCollectionView.reloadData()
     }
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
+    
+    func showInvalidPriceAlert(_ message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 extension FilterViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categories.count
+        return Categories.allCases.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: K.categoryCell, for: indexPath) as? CategoryCell else {
             return UICollectionViewCell()
         }
-        cell.configure(with: categories[indexPath.item])
+        let category = Categories.allCases[indexPath.item]
+        cell.configure(with: category.name)
+        cell.layer.cornerRadius = 10
+        
+        if category == output?.selectedCategory {
+            cell.backgroundColor = .link
+        } else {
+            cell.backgroundColor = .systemBackground
+        }
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let text = categories[indexPath.item]
+        let text = Categories.allCases[indexPath.item].name
         let font = UIFont.systemFont(ofSize: 14, weight: .medium)
         
         let textWidth = text.size(withAttributes: [.font: font]).width + 24
@@ -197,9 +240,15 @@ extension FilterViewController: UICollectionViewDelegate, UICollectionViewDataSo
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = collectionView.cellForItem(at: indexPath) as? CategoryCell else { return }
+        let category = Categories.allCases[indexPath.item]
         
         cell.backgroundColor = .link
-        cell.layer.cornerRadius = 10
+        output?.toggleCategory(category)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? CategoryCell else { return }
+        cell.backgroundColor = .lightText
     }
 }
 

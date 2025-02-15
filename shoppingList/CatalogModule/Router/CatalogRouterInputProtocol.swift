@@ -9,5 +9,5 @@ import UIKit
 
 protocol CatalogRouterInputProtocol {
     func navigateToItemDetail(_ item: Item)
-    func navigateToFilters(_ params: [String: String])
+    func navigateToFilters(_ params: [String: String], _ delegate: FilterModuleDelegate)
 }
