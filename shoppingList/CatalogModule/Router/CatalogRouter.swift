@@ -11,7 +11,8 @@ final class CatalogRouter: CatalogRouterInputProtocol {
     weak var entry: UIViewController?
     
     func navigateToItemDetail(_ item: Item) {
-        entry?.present(FilterViewController(), animated: true)
+        let productVC = ProductDetailConfigurator().configure(item: item)
+        entry?.navigationController?.pushViewController(productVC, animated: true)
     }
     
     func navigateToFilters(_ params: [String: String], _ delegate: FilterModuleDelegate) {

@@ -89,9 +89,7 @@ final class CatalogPresenter: CatalogOutputProtocol, FilterModuleDelegate {
         
         Task(priority: .userInitiated) {
             let image = await interactor?.fetchImage(urlString: url)
-            DispatchQueue.main.async {
-                completion(image)
-            }
+            completion(image)
         }
     }
     

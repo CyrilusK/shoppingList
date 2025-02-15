@@ -31,4 +31,13 @@ struct K {
     static let notFound = "Не найдено"
     static let errorLoading = "Ошибка загрузки данных \nПопробуйте еще раз"
     static let photo = "photo"
+    
+    static let title = "title"
+    static let priceMin = "price_min"
+    static let priceMax = "price_max"
+    static let price = "price"
+    static let categoryId = "categoryId"
+    
+    static let shareButtonImage = "square.and.arrow.up"
+    static let filterButton = "line.horizontal.3.decrease.circle"
 }

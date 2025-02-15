@@ -24,8 +24,9 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         output?.viewDidLoad()
     }
     
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     func setupIndicator() {
@@ -48,7 +49,7 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     }
     
     private func setupFilterButton() {
-        filterButton.setImage(UIImage(systemName: "line.horizontal.3.decrease.circle"), for: .normal)
+        filterButton.setImage(UIImage(systemName: K.filterButton), for: .normal)
         filterButton.tintColor = .systemBlue
         filterButton.addTarget(self, action: #selector(didTapFilterButton), for: .touchUpInside)
         searchBar.searchTextField.leftView = filterButton
@@ -212,6 +213,11 @@ extension CatalogViewController: UICollectionViewDataSource, UICollectionViewDel
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let item = items[indexPath.row]
+        output?.itemSelected(item)
     }
 }
 

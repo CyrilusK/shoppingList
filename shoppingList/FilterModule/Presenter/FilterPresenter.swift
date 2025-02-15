@@ -44,19 +44,19 @@ final class FilterPresenter: FilterOutputProtocol {
         }
 
         if let title = title, !title.isEmpty {
-            filters["title"] = title
+            filters[K.title] = title
         }
         if let minPrice = minPrice, !minPrice.isEmpty {
-            filters["price_min"] = minPrice
+            filters[K.priceMin] = minPrice
         }
         if let maxPrice = maxPrice, !maxPrice.isEmpty {
-            filters["price_max"] = maxPrice
+            filters[K.priceMin] = maxPrice
         }
         if let price = price, !price.isEmpty {
-            filters["price"] = price
+            filters[K.price] = price
         }
         if let category = selectedCategory {
-            filters["categoryId"] = String(category.rawValue)
+            filters[K.categoryId] = String(category.rawValue)
         }
 
         delegate?.didApplyFilters(filters)

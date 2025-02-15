@@ -159,19 +159,19 @@ class FilterViewController: UIViewController, FilterViewInputProtocol {
     private func populateFieldsFromParams() {
         let params = output?.getParams() ?? [:]
         
-        if let title = params["title"] {
+        if let title = params[K.title] {
             titleTextField.text = title
         }
-        if let minPrice = params["price_min"] {
+        if let minPrice = params[K.priceMin] {
             minPriceTextField.text = minPrice
         }
-        if let maxPrice = params["price_max"] {
+        if let maxPrice = params[K.priceMax] {
             maxPriceTextField.text = maxPrice
         }
-        if let price = params["price"] {
+        if let price = params[K.price] {
             priceTextField.text = price
         }
-        if let categoryId = params["categoryId"], let category = Categories(rawValue: Int(categoryId) ?? 1) {
+        if let categoryId = params[K.categoryId], let category = Categories(rawValue: Int(categoryId) ?? 1) {
             output?.toggleCategory(category)
         }
     }
