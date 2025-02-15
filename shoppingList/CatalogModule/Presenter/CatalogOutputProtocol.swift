@@ -17,4 +17,5 @@ protocol CatalogOutputProtocol: AnyObject {
     func pagination()
     func didSearchTextChange(_ text: String)
     func getSearchHistory() -> [String]
+    func openFilterScreen()
 }

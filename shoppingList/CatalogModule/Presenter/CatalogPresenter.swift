@@ -19,14 +19,16 @@ final class CatalogPresenter: CatalogOutputProtocol {
     private var items: [Item] = []
     private var filteredItems: [Item] = []
     private var isSearchActive: Bool = false
+    private var selectedFilters: [String: String] = [:]
     private var searchHistory: [String] = [] {
         didSet {
-            UserDefaults.standard.set(searchHistory, forKey: "searchHistory")
+            UserDefaults.standard.set(searchHistory, forKey: K.searchHistory)
+            view?.updateSearchHistory(searchHistory)
         }
     }
     
     init() {
-        searchHistory = UserDefaults.standard.stringArray(forKey: "searchHistory") ?? []
+        searchHistory = UserDefaults.standard.stringArray(forKey: K.searchHistory) ?? []
     }
     
     func viewDidLoad() {
@@ -120,7 +122,6 @@ final class CatalogPresenter: CatalogOutputProtocol {
         }
         
         filteredItems = isSearchActive ? items.filter { $0.title.lowercased().contains(text.lowercased()) } : []
-        view?.updateSearchHistory(searchHistory)
         updateView()
     }
     
@@ -131,5 +132,23 @@ final class CatalogPresenter: CatalogOutputProtocol {
     
     func getSearchHistory() -> [String] {
         return searchHistory
+    }
+    
+    func didSelectFilters(_ filters: [String: String]) {
+        selectedFilters = filters
+        reloadItems()
+    }
+    
+    func openFilterScreen() {
+        router?.navigateToFilters(selectedFilters)
+    }
+    
+    private func buildFilteredURL() -> String {
+        var url = K.urlAPI + String(nextPage) + K.postfix
+        if !selectedFilters.isEmpty {
+            let queryParams = selectedFilters.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
+            url += "?" + queryParams
+        }
+        return url
     }
 }

@@ -17,6 +17,7 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     private let retryButton = UIButton(type: .system)
     private let searchBar = UISearchBar()
     private let historyTableView = UITableView()
+    private let filterButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +44,15 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
         setupEmptyStateLabel()
         setupRetryButton()
         setupHistoryTableView()
+        setupFilterButton()
+    }
+    
+    private func setupFilterButton() {
+        filterButton.setImage(UIImage(systemName: "line.horizontal.3.decrease.circle"), for: .normal)
+        filterButton.tintColor = .systemBlue
+        filterButton.addTarget(self, action: #selector(didTapFilterButton), for: .touchUpInside)
+        searchBar.searchTextField.leftView = filterButton
+        searchBar.searchTextField.leftViewMode = .always
     }
     
     private func setupHistoryTableView() {
@@ -57,7 +67,7 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
             historyTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             historyTableView.heightAnchor.constraint(equalToConstant: 220)
         ])
-        historyTableView.register(UITableViewCell.self, forCellReuseIdentifier: "HistoryCell")
+        historyTableView.register(UITableViewCell.self, forCellReuseIdentifier: K.historyCell)
     }
     
     private func setupSearchBar() {
@@ -109,6 +119,8 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     
     private func setupRetryButton() {
         retryButton.setTitle(K.errorLoading, for: .normal)
+        retryButton.titleLabel?.numberOfLines = 0
+        retryButton.titleLabel?.textAlignment = .center
         retryButton.addTarget(self, action: #selector(tapRetryButton), for: .touchUpInside)
         view.addSubview(retryButton)
         retryButton.translatesAutoresizingMaskIntoConstraints = false
@@ -127,6 +139,10 @@ final class CatalogViewController: UIViewController, CatalogViewInputProtocol {
     @objc private func dismissKeyboard() {
         view.endEditing(true)
         historyTableView.isHidden = true
+    }
+    
+    @objc private func didTapFilterButton() {
+        output?.openFilterScreen()
     }
     
     func showItems(_ items: [Item]) {
@@ -229,11 +245,11 @@ extension CatalogViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: K.historyCell, for: indexPath)
         if let searchHistory = output?.getSearchHistory() {
             var cellContext = cell.defaultContentConfiguration()
             cellContext.text = searchHistory[indexPath.row]
-                cell.contentConfiguration = cellContext
+            cell.contentConfiguration = cellContext
         }
         return cell
     }

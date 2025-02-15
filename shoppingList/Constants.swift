@@ -21,6 +21,9 @@ struct K {
     
     //Идентификатор
     static let reuseIdentifier = "ItemCell"
+    static let historyCell = "HistoryCell"
+    static let searchHistory = "searchHistory"
+    static let categoryCell = "CategoryCell"
     
     static let textPlaceholderSearchBar = "Поиск товаров"
     static let notFound = "Не найдено"
