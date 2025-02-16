@@ -50,7 +50,7 @@ final class ItemCell: UICollectionViewCell {
     func updateImage(_ image: UIImage?) {
         DispatchQueue.main.async {
             guard let image = image else {
-                self.imageView.image = UIImage(systemName: "photo")
+                self.imageView.image = UIImage(systemName: K.photo)
                 return
             }
             self.imageView.image = image

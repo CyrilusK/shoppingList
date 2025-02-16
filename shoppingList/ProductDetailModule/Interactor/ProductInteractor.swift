@@ -9,6 +9,7 @@ import UIKit
 
 final class ProductInteractor: ProductInteractorInputProtocol {
     weak var output: ProductOutputProtocol?
+    private let storageManager = CoreDataManager.shared
     
     func fetchImage(urlString: String) async -> UIImage? {
         guard let imageURL = URL(string: urlString) else {
@@ -21,5 +22,17 @@ final class ProductInteractor: ProductInteractorInputProtocol {
         catch {
             return nil
         }
+    }
+    
+    func checkItemInList(by id: Int) -> Int {
+        storageManager.getItemQuantity(id)
+    }
+    
+    func addItemToList(item: Item) {
+        storageManager.addItem(item)
+    }
+    
+    func updateItemQuantity(itemID: Int, quantity: Int) {
+        storageManager.updateQuantity(itemID, newQuantity: quantity)
     }
 }

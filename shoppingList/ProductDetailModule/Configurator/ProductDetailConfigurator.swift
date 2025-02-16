@@ -12,11 +12,14 @@ final class ProductDetailConfigurator {
         let view = ProductDetailViewController()
         let presenter = ProductDetailPresenter(item: item)
         let interactor = ProductInteractor()
+        let router = ProductRouter()
 
         view.output = presenter
         presenter.view = view
         interactor.output = presenter
         presenter.interactor = interactor
+        presenter.router = router
+        router.entry = view
         
         return view
     }

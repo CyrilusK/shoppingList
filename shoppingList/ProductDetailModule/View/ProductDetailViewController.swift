@@ -188,6 +188,12 @@ final class ProductDetailViewController: UIViewController, ProductViewInputProto
         })
     }
     
+    func updateUI(quantity: Int) {
+        quantityLabel.text = "\(quantity)"
+        let buttonTitle = quantity > 0 ? "К списку покупок" : "Добавить в список"
+        addToListButton.setTitle(buttonTitle, for: .normal)
+    }
+    
     @objc private func shareProduct() {
         let text = "\(descriptionLabel.text ?? "Товар")"
         let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
@@ -195,18 +201,21 @@ final class ProductDetailViewController: UIViewController, ProductViewInputProto
     }
     
     @objc private func addToShoppingList() {
-        addToListButton.setTitle("К списку покупок", for: .normal)
+        output?.handleAddToListTapped()
     }
     
     @objc private func decreaseQuantity() {
         if let quantity = Int(quantityLabel.text ?? "1"), quantity > 1 {
             quantityLabel.text = "\(quantity - 1)"
+            output?.updateQuantity(quantity)
         }
     }
     
     @objc private func increaseQuantity() {
         if let quantity = Int(quantityLabel.text ?? "1") {
             quantityLabel.text = "\(quantity + 1)"
+            output?.updateQuantity(quantity)
         }
     }
 }
+

@@ -26,6 +26,9 @@ struct K {
     static let historyCell = "HistoryCell"
     static let searchHistory = "searchHistory"
     static let categoryCell = "CategoryCell"
+    static let shoppingItemCell = "ShoppingItemCell"
+    
+    static let shoppingItemEntity = "ShoppingItemEntity"
     
     static let textPlaceholderSearchBar = "Поиск товаров"
     static let notFound = "Не найдено"
@@ -40,4 +43,5 @@ struct K {
     
     static let shareButtonImage = "square.and.arrow.up"
     static let filterButton = "line.horizontal.3.decrease.circle"
+    static let trashFill = "trash.fill"
 }

@@ -9,4 +9,7 @@ import UIKit
 
 protocol ProductInteractorInputProtocol: AnyObject {
     func fetchImage(urlString: String) async -> UIImage?
+    func checkItemInList(by id: Int) -> Int
+    func addItemToList(item: Item)
+    func updateItemQuantity(itemID: Int, quantity: Int)
 }
