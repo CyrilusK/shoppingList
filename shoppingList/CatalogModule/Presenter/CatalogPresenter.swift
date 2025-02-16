@@ -53,13 +53,15 @@ final class CatalogPresenter: CatalogOutputProtocol, FilterModuleDelegate {
     }
     
     func didFetchItems(_ items: [Item]) {
-        self.isLoading = false
-        DispatchQueue.main.async {
-            if self.isPagination {
+        isLoading = false
+        if isPagination {
+            DispatchQueue.main.async {
                 self.items.append(contentsOf: items)
                 self.view?.appendItems(items)
-                self.isPagination = false
-            } else {
+            }
+            isPagination = false
+        } else {
+            DispatchQueue.main.async {
                 self.items = items
                 self.view?.showItems(items)
             }
