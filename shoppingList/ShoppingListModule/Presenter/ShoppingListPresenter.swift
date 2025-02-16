@@ -13,10 +13,12 @@ final class ShoppingListPresenter: ShoppingListOutputProtocol {
     var router: ShoppingListRouterInputProtocol?
     
     private var items: [ShoppingItemEntity] = []
+    private func notifyProductListUpdated() {
+        NotificationCenter.default.post(name: .shoppingListUpdated, object: nil)
+    }
     
     func viewDidLoad() {
         interactor?.fetchShoppingItems()
-        //NotificationCenter.default.addObserver(self, selector: #selector(handleShoppingListUpdate), name: .shoppingListUpdated, object: nil)
     }
     
     func didLoadItems(_ items: [ShoppingItemEntity]) {
@@ -28,12 +30,14 @@ final class ShoppingListPresenter: ShoppingListOutputProtocol {
         interactor?.deleteItem(item: items[index])
         items.remove(at: index)
         view?.reloadData()
+        notifyProductListUpdated()
     }
     
     func clearList() {
         interactor?.clearAllItems()
         items.removeAll()
         view?.reloadData()
+        notifyProductListUpdated()
     }
     
     func shareList() {
@@ -73,11 +77,13 @@ final class ShoppingListPresenter: ShoppingListOutputProtocol {
         let item = items[index]
         let newQuantity = Int(item.quantity) + 1
         interactor?.updateItemQuantity(item: item, quantity: newQuantity)
+        notifyProductListUpdated()
     }
 
     func decreaseQuantity(at index: Int) {
         let item = items[index]
         let newQuantity = max(1, Int(item.quantity) - 1)
         interactor?.updateItemQuantity(item: item, quantity: newQuantity)
+        notifyProductListUpdated()
     }
 }

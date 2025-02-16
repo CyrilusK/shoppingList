@@ -82,14 +82,6 @@ final class CoreDataManager: CoreDataManagerProtocol {
             print("[DEBUG] Ошибка очистки: \(error)")
         }
     }
-//    private func saveContext() {
-//        guard context.hasChanges else { return }
-//        do {
-//            try context.save()
-//        } catch {
-//            print("[DEBUG] Failed to save context: \(error)")
-//        }
-//    }
     
     func getItemQuantity(_ itemID: Int) -> Int {
         let fetchRequest: NSFetchRequest<ShoppingItemEntity> = ShoppingItemEntity.fetchRequest()

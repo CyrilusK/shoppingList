@@ -13,15 +13,21 @@ final class ProductDetailPresenter: ProductOutputProtocol {
     var router: ProductRouterInputProtocol?
     
     private let item: Item
-    private var currentQuantity: Int = 0
+    private var currentQuantity: Int = 1
+    private var isInList: Bool = false
 
     init(item: Item) {
         self.item = item
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     func viewDidLoad() {
         view?.setupUI(item)
         getItemQuantity()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleShoppingListUpdate), name: .shoppingListUpdated, object: nil)
     }
     
     func getImage(_ url: String?, completion: @escaping (UIImage?) -> Void) {
@@ -42,24 +48,36 @@ final class ProductDetailPresenter: ProductOutputProtocol {
     
     func getItemQuantity() {
         let quantity = interactor?.checkItemInList(by: item.id) ?? 0
-        currentQuantity = quantity
-        view?.updateUI(quantity: currentQuantity)
+        if quantity == 0 {
+            currentQuantity = 1
+            isInList = false
+        } else {
+            currentQuantity = quantity
+            isInList = true
+        }
+        view?.updateUI(quantity: currentQuantity, isInList: isInList)
     }
     
     func updateQuantity(_ newQuantity: Int) {
-        interactor?.updateItemQuantity(itemID: item.id, quantity: currentQuantity)
         currentQuantity = newQuantity
-        view?.updateUI(quantity: currentQuantity)
+        interactor?.updateItemQuantity(itemID: item.id, quantity: currentQuantity)
+        view?.updateUI(quantity: currentQuantity, isInList: isInList)
     }
     
     func handleAddToListTapped() {
-        if currentQuantity > 0 {
+        if isInList {
+            interactor?.updateItemQuantity(itemID: item.id, quantity: currentQuantity)
             router?.navigateToShoppingList()
         } else {
             interactor?.addItemToList(item: item)
-            currentQuantity = 1
-            view?.updateUI(quantity: currentQuantity)
+            isInList = true
+            view?.updateUI(quantity: currentQuantity, isInList: isInList)
         }
+    }
+    
+    @objc private func handleShoppingListUpdate() {
+        print(#function)
+        getItemQuantity()
     }
 }
 

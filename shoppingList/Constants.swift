@@ -45,3 +45,7 @@ struct K {
     static let filterButton = "line.horizontal.3.decrease.circle"
     static let trashFill = "trash.fill"
 }
+
+extension Notification.Name {
+    static let shoppingListUpdated = Notification.Name("shoppingListUpdated")
+}

@@ -33,13 +33,6 @@ final class ShoppingListViewController: UIViewController, ShoppingListViewInputP
         tableView.dataSource = self
         view.addSubview(tableView)
         tableView.frame = view.bounds
-//        tableView.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-//            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-//            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-//            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-//        ])
     }
     
     private func setupButtons() {
@@ -85,6 +78,17 @@ extension ShoppingListViewController: UITableViewDelegate, UITableViewDataSource
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         output?.didSelectItem(at: indexPath.row)
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] _, _, completionHandler in
+            self?.output?.deleteItem(at: indexPath.row)
+            completionHandler(true)
+        }
+        deleteAction.image = UIImage(systemName: K.trashFill)
+        deleteAction.backgroundColor = .systemRed
+
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 

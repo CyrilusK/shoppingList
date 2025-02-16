@@ -142,11 +142,13 @@ final class ProductDetailViewController: UIViewController, ProductViewInputProto
     
     private func setupMinusButton() {
         minusButton.setTitle("-", for: .normal)
+        minusButton.titleLabel?.font = .systemFont(ofSize: 25, weight: .medium)
         minusButton.addTarget(self, action: #selector(decreaseQuantity), for: .touchUpInside)
     }
     
     private func setupPlusButton() {
         plusButton.setTitle("+", for: .normal)
+        plusButton.titleLabel?.font = .systemFont(ofSize: 25, weight: .medium)
         plusButton.addTarget(self, action: #selector(increaseQuantity), for: .touchUpInside)
     }
     
@@ -188,9 +190,9 @@ final class ProductDetailViewController: UIViewController, ProductViewInputProto
         })
     }
     
-    func updateUI(quantity: Int) {
+    func updateUI(quantity: Int, isInList: Bool) {
         quantityLabel.text = "\(quantity)"
-        let buttonTitle = quantity > 0 ? "К списку покупок" : "Добавить в список"
+        let buttonTitle = isInList ? "К списку покупок" : "Добавить в список"
         addToListButton.setTitle(buttonTitle, for: .normal)
     }
     
@@ -206,15 +208,17 @@ final class ProductDetailViewController: UIViewController, ProductViewInputProto
     
     @objc private func decreaseQuantity() {
         if let quantity = Int(quantityLabel.text ?? "1"), quantity > 1 {
-            quantityLabel.text = "\(quantity - 1)"
-            output?.updateQuantity(quantity)
+            let newQuantity = quantity - 1
+            quantityLabel.text = "\(newQuantity)"
+            output?.updateQuantity(newQuantity)
         }
     }
     
     @objc private func increaseQuantity() {
         if let quantity = Int(quantityLabel.text ?? "1") {
-            quantityLabel.text = "\(quantity + 1)"
-            output?.updateQuantity(quantity)
+            let newQuantity = quantity + 1
+            quantityLabel.text = "\(newQuantity)"
+            output?.updateQuantity(newQuantity)
         }
     }
 }
