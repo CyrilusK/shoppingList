@@ -69,6 +69,8 @@ extension ShoppingListViewController: UITableViewDelegate, UITableViewDataSource
             return UITableViewCell()
         }
         guard let item = output?.getItems()[indexPath.row] else { return cell }
+        cell.delegate = self
+        cell.selectionStyle = .none
         cell.configure(with: item)
         output?.getImage(item.image) { image in
             cell.updateImage(image)
@@ -79,6 +81,7 @@ extension ShoppingListViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         output?.didSelectItem(at: indexPath.row)
     }
+    
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] _, _, completionHandler in

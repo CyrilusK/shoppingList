@@ -56,12 +56,12 @@ final class ShoppingItemCell: UITableViewCell {
         titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         priceLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
 
-        let priceWeightStack = UIStackView(arrangedSubviews: [priceLabel])
-        priceWeightStack.axis = .horizontal
-        priceWeightStack.spacing = 8
+        let priceStack = UIStackView(arrangedSubviews: [priceLabel])
+        priceStack.axis = .horizontal
+        priceStack.spacing = 8
 
         infoStackView.addArrangedSubview(titleLabel)
-        infoStackView.addArrangedSubview(priceWeightStack)
+        infoStackView.addArrangedSubview(priceStack)
 
         NSLayoutConstraint.activate([
             infoStackView.leadingAnchor.constraint(equalTo: itemImageView.trailingAnchor, constant: 12),
@@ -81,12 +81,14 @@ final class ShoppingItemCell: UITableViewCell {
         decreaseButton.tintColor = .black
         decreaseButton.backgroundColor = .systemGray6
         decreaseButton.layer.cornerRadius = 8
+        decreaseButton.addTarget(self, action: #selector(didTapDecrease), for: .touchUpInside)
         
         increaseButton.setTitle("+", for: .normal)
         increaseButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         increaseButton.tintColor = .black
         increaseButton.backgroundColor = .systemGray6
         increaseButton.layer.cornerRadius = 8
+        increaseButton.addTarget(self, action: #selector(didTapIncrease), for: .touchUpInside)
         
         quantityLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         quantityLabel.textAlignment = .center
@@ -102,7 +104,8 @@ final class ShoppingItemCell: UITableViewCell {
             decreaseButton.heightAnchor.constraint(equalToConstant: 20),
             increaseButton.widthAnchor.constraint(equalToConstant: 20),
             increaseButton.heightAnchor.constraint(equalToConstant: 20),
-            quantityLabel.widthAnchor.constraint(equalToConstant: 20)
+            quantityLabel.widthAnchor.constraint(equalToConstant: 20),
+            infoStackView.trailingAnchor.constraint(equalTo: quantityStackView.leadingAnchor, constant: -5)
         ])
     }
 
@@ -118,8 +121,16 @@ final class ShoppingItemCell: UITableViewCell {
                 self.imageView?.image = UIImage(systemName: K.photo)
                 return
             }
-            self.imageView?.image = image
+            self.itemImageView.image = image
         }
+    }
+    
+    @objc private func didTapIncrease() {
+        delegate?.didTapIncreaseQuantity(in: self)
+    }
+
+    @objc private func didTapDecrease() {
+        delegate?.didTapDecreaseQuantity(in: self)
     }
 }
 

@@ -50,7 +50,7 @@ final class FilterPresenter: FilterOutputProtocol {
             filters[K.priceMin] = minPrice
         }
         if let maxPrice = maxPrice, !maxPrice.isEmpty {
-            filters[K.priceMin] = maxPrice
+            filters[K.priceMax] = maxPrice
         }
         if let price = price, !price.isEmpty {
             filters[K.price] = price
