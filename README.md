@@ -1,5 +1,5 @@
 
-##[Тестовое задание от Авито](https://github.com/avito-tech/tech-internship/blob/main/Tech%20Internships/IOS/IOS-trainee-assignment-winter-2025/IOS-trainee-assignment-winter-2025.md)
+[Тестовое задание от Авито](https://github.com/avito-tech/tech-internship/blob/main/Tech%20Internships/IOS/IOS-trainee-assignment-winter-2025/IOS-trainee-assignment-winter-2025.md)
 
 ## Инструкция:
 - Для выбора фильтров нажмите на верхнюю левую кнопку и подберите нужные параметры, затем нажмите кнопку «Применить». Для сброса фильтров снова откройте меню фильтров и нажмите «Очистить фильтры»
